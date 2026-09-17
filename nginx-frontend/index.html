@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask CI/CD Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 40px; }
+        .card { max-width: 640px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #e00; }
+        button { padding: 10px 20px; font-size: 16px; background: #e00; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #b00; }
+        pre { background: #222; color: #0f0; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🚀 Nginx + Flask on OpenShift</h1>
+        <p>Ye page <b>Nginx</b> serve kar raha hai. Neeche button dabao — request <b>Flask backend</b> pe jayegi.</p>
+        <button onclick="callApi()">Call /api/hello</button>
+        <pre id="output">Result yahan aayega...</pre>
+    </div>
+
+    <script>
+        async function callApi() {
+            const out = document.getElementById('output');
+            out.textContent = 'Loading...';
+            try {
+                const res = await fetch('/api/hello');
+                const data = await res.json();
+                out.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                out.textContent = 'Error: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
