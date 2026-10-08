@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo 'GitHub se code checkout ho raha hai...'
+                checkout scm
+            }
+        }
+
+        stage('Build Flask Backend') {
+            steps {
+                echo 'Flask backend Docker image build ho rahi hai...'
+                sh 'docker build -t flask-backend:latest ./flask-backend'
+            }
+        }
+
+        stage('Build Nginx Frontend') {
+            steps {
+                echo 'Nginx frontend Docker image build ho rahi hai...'
+                sh 'docker build -t nginx-frontend:latest ./nginx-frontend'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                echo 'Application deploy ho rahi hai...'
+
+                sh '''
+                    docker network inspect flask-cicd-network >/dev/null 2>&1 || \
+                    docker network create flask-cicd-network
+
+                    docker rm -f flask-backend >/dev/null 2>&1 || true
+                    docker rm -f nginx-frontend >/dev/null 2>&1 || true
+
+                    docker run -d \
+                        --name flask-backend \
+                        --network flask-cicd-network \
+                        flask-backend:latest
+
+                    docker run -d \
+                        --name nginx-frontend \
+                        --network flask-cicd-network \
+                        -p 8080:8080 \
+                        nginx-frontend:latest
+                '''
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                echo 'Application test ho rahi hai...'
+
+                sh '''
+                    sleep 5
+
+                    curl -f http://localhost:8080/api/health
+
+                    echo ""
+
+                    curl -f http://localhost:8080/api/hello
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI/CD SUCCESS - Application successfully deployed!'
+        }
+
+        failure {
+            echo 'CI/CD FAILED - Pipeline mein error aya hai.'
+        }
+    }
+}
