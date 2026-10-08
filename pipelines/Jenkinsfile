@@ -56,11 +56,11 @@ pipeline {
                 sh '''
                     sleep 5
 
-                    curl -f http://localhost:8080/api/health
+                    curl -f http://localhost:8082/api/health
 
                     echo ""
 
-                    curl -f http://localhost:8080/api/hello
+                    curl -f http://localhost:8082/api/hello
                 '''
             }
         }
